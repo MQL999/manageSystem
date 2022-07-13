@@ -1,0 +1,75 @@
+{% extends 'template.html' %}
+{% block content %}
+    <div class="container">
+        <div style="margin-bottom: 10px">
+            <a class="btn btn-primary" style="background-color: #67b168;border-color: #67b168" href="/user/add/"
+               target="-blank">
+                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                添加员工
+            </a>
+             <div style="float: right;width: 300px;">
+                <form method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="请输入姓名的部分内容" name="q"
+                               value="{{ search_data }}">
+                        <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">
+                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        </button>
+                    </span>
+                    </div><!-- /input-group -->
+                </form>
+            </div>
+        </div>
+        <div>
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+                    员工列表
+                </div>
+
+                <!-- Table -->
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>姓名</th>
+                        <th>性别</th>
+                        <th>年龄</th>
+                        <th>工资</th>
+                        <th>入职时间</th>
+                        <th>邮箱</th>
+                        <th>部门</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in data %}
+                        <tr>
+                            <th>{{ user.id }}</th>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.get_sex_display }}</td>
+                            <td>{{ user.age }}</td>
+                            <td>{{ user.salary }}</td>
+                            <td>{{ user.entry_time|date:"Y-m-d" }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.depart.title }}</td>
+                            <td>
+                                <a class="btn btn-primary btn-xs" href="/user/{{ user.id }}/edit/"
+                                   target="_blank">编辑</a>
+                                <a class="btn btn-danger btn-xs" href="/user/delete?id={{ user.id }}">删除</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+         <nav aria-label="...">
+            <ul class="pagination">
+                {{ page_string }}
+            </ul>
+        </nav>
+    </div>
+{% endblock %}

@@ -1,0 +1,251 @@
+{% extends 'template.html' %}
+{% block content %}
+    <div class="container">
+        <div>
+            <input type="button" class="btn btn-success" value="添加订单" id="btnAdd">
+        </div>
+        <div style="margin-bottom: 40px">
+            <div style="float: right;width: 300px;">
+                <form method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="请输入商品名" name="q"
+                               value="{{ search_data }}">
+                        <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                                </button>
+                        </span>
+                    </div><!-- /input-group -->
+                </form>
+            </div>
+        </div>
+        <div>
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+                    订单列表
+                </div>
+
+                <!-- Table -->
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>订单号</th>
+                        <th>商品名</th>
+                        <th>价格</th>
+                        <th>购买者邮箱</th>
+                        <th>状态</th>
+                        <th>订单负者人</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for order in data %}
+                        <tr>
+                            <th>{{ order.id }}</th>
+                            <td>{{ order.order_id }}</td>
+                            <td>{{ order.phone_num }}</td>
+                            <td>¥{{ order.price }}</td>
+                            <td>{{ order.email }}</td>
+                            <td>{{ order.get_status_display }}</td>
+                            <td>{{ order.principal_id }}</td>
+                            <td>
+                                <input type="button" class="btn btn-primary btn-xs btn-edit" value="编辑" uid="{{ order.id }}">
+                                <input type="button" class="btn btn-danger btn-xs btn-delete" value="删除"
+                                       data-toggle="modal" data-target="#deleteModal" uid="{{ order.id }}">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <nav aria-label="...">
+            <ul class="pagination">
+                {{ page_string }}
+            </ul>
+        </nav>
+    </div>
+
+
+    <!-- 添加/编辑弹出框 -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">添加订单</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="formModel">
+                        <div class="clearfix">
+                            {% for field in form %}
+                                <div class="col-xs-6" style="margin-bottom: 15px">
+                                    <div class="form-group" style="position: relative">
+                                        <label>{{ field.label }}</label>
+                                        {{ field }}
+                                        <span class="error-message" style="color: red;position: absolute"></span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" id="btnSave" class="btn btn-primary">保存</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!--删除警告-->
+    <div class="modal fade" tabindex="-1" role="dialog" id="deleteModal">
+        <div class="modal-dialog" role="document">
+            <div class="alert alert-danger alert-dismissible fade in" role="alert" style="overflow:hidden;">
+                <h4>确定要删除吗？</h4>
+                <p style="margin: 10px 0">删除后数据会被永久删除，无法恢复！</p>
+                <p>
+                    <button type="button" class="btn btn-danger" style="margin-left: 430px" id="btn-delete">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="">取消</button>
+                </p>
+            </div>
+        </div><!-- /.modal -->
+    </div>
+
+{% endblock %}
+{% block js %}
+    <script>
+    var deleteId;
+    var editId;
+        $(function () {
+            bindAddEvent();
+            saveOrder();
+            orderDelete();
+            bindDeleteEvent();
+            bindEditEvent();
+        })
+
+        function bindAddEvent(){
+            $("#btnAdd").click(function (){
+                $("#myModal").modal("show");
+                $("#formModel")[0].reset();
+                editId=undefined;
+            })
+        }
+
+        function saveOrder() {
+            $("#btnSave").click(function () {
+                $(".error-message").empty();
+                if (editId){
+                    doEdit();
+                }else {
+                    doAdd();
+                }
+            })
+        }
+
+        function doAdd(){
+            $.ajax({
+                    url: "/order/add/",
+                    type: "post",
+                    data: $("#formModel").serialize(),
+                    datatype: "JSON",
+                    success: function (res) {
+                        if (res.status) {
+                            alert("添加成功！");
+                            $("#formModel")[0].reset();
+                            $("#myModal").modal("hide");
+                            window.location.reload();
+                        } else {
+                            $.each(res.error, function (name, errorList) {
+                                $("#id_" + name).next().text(errorList[0])
+                            })
+                        }
+                    }
+                })
+        }
+
+        function doEdit(){
+             $.ajax({
+                    url: "/order/edit/?uid="+editId,
+                    type: "post",
+                    data: $("#formModel").serialize(),
+                    datatype: "JSON",
+                    success: function (res) {
+                        if (res.status) {
+                            alert("修改成功！");
+                            $("#formModel")[0].reset();
+                            $("#myModal").modal("hide");
+                            window.location.reload();
+                        } else {
+                            $.each(res.error, function (name, errorList) {
+                                $("#id_" + name).next().text(errorList[0])
+                            })
+                        }
+                    }
+                })
+        }
+
+        function bindDeleteEvent(){
+            $(".btn-delete").click(function (){
+                deleteId=$(this).attr("uid");
+            })
+        }
+
+        function bindEditEvent(){
+            $(".btn-edit").click(function (){
+                var uid=$(this).attr("uid");
+                editId=uid;
+                $(".modal-title").text("修改订单");
+                $("#formModel")[0].reset();
+                $(".error-message").empty();
+                 $.ajax({
+                    url:"/order/detail/",
+                    type: "GET",
+                    data:{
+                        "uid":uid
+                    },
+                    datatype: "JSON",
+                    success:function (res){
+                       if(res.status){
+                           $("#myModal").modal("show");
+                           $.each(res.data,function (name,value){
+                               $("#id_"+name).val(value);
+                           })
+                       } else {
+                           alert(res.error);
+                       }
+                    }
+                })
+            })
+        }
+
+        function orderDelete() {
+            $("#btn-delete").click(function () {
+                $.ajax({
+                    url:"/order/delete/",
+                    type: "GET",
+                    data:{
+                        "uid":deleteId
+                    },
+                    datatype: "JSON",
+                    success:function (res){
+                        if(res.status){
+                            $("#deleteModal").modal("hide");
+                            location.reload();
+                            deleteId=null;
+                        } else {
+                            $("#deleteModal").modal("hide");
+                            alert(res.error);
+                        }
+                    }
+                })
+
+            })
+        }
+    </script>
+{% endblock %}

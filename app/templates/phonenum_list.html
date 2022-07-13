@@ -1,0 +1,70 @@
+{% extends 'template.html' %}
+{% block content %}
+    <div class="container">
+        <div style="margin-bottom: 10px">
+            <a class="btn btn-primary" style="background-color: #67b168;border-color: #67b168" href="/phonenum/add/"
+               target="-blank">
+                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                添加靓号
+            </a>
+            <div style="float: right;width: 300px;">
+                <form method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search for..." name="q"
+                               value="{{ search_data }}">
+                        <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">
+                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        </button>
+                    </span>
+                    </div><!-- /input-group -->
+                </form>
+            </div>
+        </div>
+        <div>
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+                    靓号列表
+                </div>
+
+                <!-- Table -->
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>号码</th>
+                        <th>价格</th>
+                        <th>等级</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for phonenum in data %}
+                        <tr>
+                            <th>{{ phonenum.id }}</th>
+                            <td>{{ phonenum.phone_num }}</td>
+                            <td>¥{{ phonenum.price }}</td>
+                            <td>{{ phonenum.get_level_display }}</td>
+                            <td>{{ phonenum.get_status_display }}</td>
+                            <td>
+                                <a class="btn btn-primary btn-xs" href="/phonenum/{{ phonenum.id }}/edit/"
+                                   target="_blank">编辑</a>
+                                <a class="btn btn-danger btn-xs" href="/phonenum/delete?id={{ phonenum.id }}">删除</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <nav aria-label="...">
+            <ul class="pagination">
+                {{ page_string }}
+            </ul>
+        </nav>
+    </div>
+
+{% endblock %}
